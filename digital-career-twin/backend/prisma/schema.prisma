@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String          @id @default(uuid())
+  name                 String
+  email                String          @unique
+  password             String?
+  avatarUrl            String?
+  degree               String?
+  year                 Int?
+  college              String?
+  marks10th            Float?
+  marks12th            Float?
+  cgpa                 Float?
+  targetRole           String?
+  targetCompany        String?
+  expectedSalary       Int?
+  skills               Json?
+  learningPreference   String?
+  interests            String[]
+  strengths            String[]
+  weaknesses           String[]
+  streakDays           Int             @default(0)
+  careerReadiness      Float           @default(0)
+  onboardingDone       Boolean         @default(false)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  notificationsEnabled Boolean         @default(true)
+  suggestions          AiSuggestion[]
+  assessments          Assessment[]
+  calendarEvents       CalendarEvent[]
+}
+
+model Assessment {
+  id         String   @id @default(uuid())
+  userId     String
+  category   String
+  score      Int
+  timeTaken  Int
+  questions  Json
+  aiFeedback String?
+  takenAt    DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiSuggestion {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  content   Json
+  helpful   Boolean?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CalendarEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  type      String
+  date      DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

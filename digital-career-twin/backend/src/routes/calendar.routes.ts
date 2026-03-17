@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth.middleware';
 
@@ -25,7 +26,7 @@ calendarRouter.post('/events', authenticate, async (req: AuthRequest, res: Respo
   }
   try {
     const event = await prisma.calendarEvent.create({
-      data: { userId: req.user!.userId, title, type, date: new Date(date) },
+      data: { userId: req.user!.userId, title, type, date: new Date(date), notes: req.body.notes || null },
     });
     res.status(201).json(event);
   } catch {
@@ -39,6 +40,31 @@ calendarRouter.delete('/events/:id', authenticate, async (req: AuthRequest, res:
       where: { id: String(req.params.id), userId: req.user!.userId },
     });
     res.json({ deleted: true });
+  } catch {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+calendarRouter.put('/events/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { title, type, date, notes } = req.body as {
+    title?: string; type?: string; date?: string; notes?: string;
+  };
+  try {
+    const data: Prisma.CalendarEventUpdateManyMutationInput = {};
+    if (title !== undefined) data.title = title;
+    if (type !== undefined) data.type = type;
+    if (date !== undefined) data.date = new Date(date);
+    if (notes !== undefined) data.notes = notes;
+
+    const result = await prisma.calendarEvent.updateMany({
+      where: { id: String(req.params.id), userId: req.user!.userId },
+      data,
+    });
+    if (result.count === 0) {
+      res.status(404).json({ error: 'Event not found' });
+      return;
+    }
+    res.json({ updated: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
   }

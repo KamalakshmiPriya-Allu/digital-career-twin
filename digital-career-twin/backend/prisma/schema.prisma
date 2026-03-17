@@ -36,6 +36,7 @@ model User {
   suggestions          AiSuggestion[]
   assessments          Assessment[]
   calendarEvents       CalendarEvent[]
+  files                UserFile[]
 }
 
 model Assessment {
@@ -66,6 +67,18 @@ model CalendarEvent {
   title     String
   type      String
   date      DateTime
+  notes     String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserFile {
+  id         String   @id @default(uuid())
+  userId     String
+  filename   String
+  fileType   String
+  fileUrl    String
+  category   String   @default("other")
+  uploadedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

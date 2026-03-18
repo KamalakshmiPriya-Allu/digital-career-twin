@@ -12,7 +12,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const aiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
-  keyGenerator: (req: AuthRequest) => req.user?.userId || req.ip?.replace(/^::ffff:/, '') || 'unknown',
+  keyGenerator: (req: AuthRequest) => req.user?.userId || req.socket.remoteAddress || 'unknown',
   message: 'Too many AI requests. Try again in an hour.',
 });
 
